@@ -135,4 +135,46 @@ Ahora ya estaría listo para hacer las comprobaciones y pruebas
 
 ![img](imagenes/wbinfo2.png)
 
-### Vamos a crear una carpeta
+### Carpeta compartida
+
+Creamos la carpeta solicitada con `sudo mkdir -p /srv/samba/ventas`
+
+Le cambiamos el propietario con `sudo chgrp "PRY-JMG\G_Ventas" /srv/samba/ventas`
+
+Y le damos permisos totales de lectura/escritura al grupo con `sudo chmod 770 /srv/samba/ventas`
+
+Con la carpeta lista ahora vamos a "compartirla" en la red que hemos creado, para ello volvemos a editar el archivo `/etc/samba/smb.conf` en el que creamos un apartado para la carpeta que estamos compartiendo.
+
+```
+[ventas]
+   comment = Carpeta de Ventas - Acceso AD
+   path = /srv/samba/ventas
+   browseable = yes
+   read only = no
+   guest ok = no
+   valid users = "@PRY-JMG\G_Ventas"
+   force group = "PRY-JMG\G_Ventas"
+   directory mask = 0770
+   create mask = 0770
+```
+
+![img](imagenes/carpeta.png)
+
+Por último, reiniciamos los servicios de nuevo con `sudo systemctl restart winbind smbd nmbd`
+
+Para comprobarlo nos vamos a Windows Server y nos conectamos a la carpeta ventas desde el explorador de archivos con `\\192.168.56.114\ventas`
+
+Se nos abrira una ventana en la que tendremos que meter el usuario y contraseña de uno de los usuarios de del grupo ventas.
+
+Si intentamos entrar con un usuario que no pertenezca a ventas nos denegará el acceso.
+
+Creamos un txt para comprobar que lo podemos encontrar en Ubuntu con `sudo ls -l /srv/samba/ventas`.
+
+![img](imagenes/usug.png)
+
+![img](imagenes/usuv.png)
+
+![img](imagenes/ls.png)
+
+## Metodo Moderno
+
